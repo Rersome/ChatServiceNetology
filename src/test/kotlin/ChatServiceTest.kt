@@ -4,262 +4,209 @@ import Exceptions.NotEnoughUsersException
 import Exceptions.UserNotFoundException
 import Services.Chat
 import Services.ChatService
-import Services.ChatService.addUserToChat
-import Services.ChatService.createUser
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-class NoteWallServiceTest {
+class ChatServiceTest {
+
     @Before
     fun clearBeforeTest() {
         ChatService.clear()
     }
 
     @Test
-    fun testAddUserPositive(){
+    fun testAddUserPositive() {
         val user = ChatService.createUser()
-
         assertEquals(1, user.id)
     }
 
     @Test
-    fun testAddUserNegative(){
+    fun testAddUserNegative() {
         val user = ChatService.createUser()
-
         assertNotEquals(2, user.id)
     }
 
     @Test
-    fun testGetUserByIdPositive(){
+    fun testGetUserByIdPositive() {
         val user = ChatService.createUser()
-
         assertEquals(user, ChatService.getUserById(user.id))
     }
 
     @Test
-    fun testGetUserByIdNegative(){
+    fun testGetUserByIdNegative() {
         val user1 = ChatService.createUser()
         val user2 = ChatService.createUser()
-
         assertNotEquals(user1, ChatService.getUserById(user2.id))
     }
 
     @Test
-    fun testAddChatPositive(){
-        val chat = ChatService.createChat()
-
+    fun testAddChatPositive() {
+        val user1 = ChatService.createUser()
+        val user2 = ChatService.createUser()
+        val chat = ChatService.createMessage(user1, user2)
         assertEquals(1, chat.id)
     }
 
     @Test
-    fun testAddChatNegative(){
-        val chat = ChatService.createChat()
-
+    fun testAddChatNegative() {
+        val user1 = ChatService.createUser()
+        val user2 = ChatService.createUser()
+        val chat = ChatService.createMessage(user1, user2)
         assertNotEquals(2, chat.id)
     }
 
     @Test
-    fun testGetChatByIdPositive(){
-        val chat = ChatService.createChat()
-
+    fun testGetChatByIdPositive() {
+        val user1 = ChatService.createUser()
+        val user2 = ChatService.createUser()
+        val chat = ChatService.createMessage(user1, user2)
         assertEquals(chat, ChatService.getChatById(chat.id))
     }
 
     @Test
-    fun testGetChatByIdNegative(){
-        val chat1 = ChatService.createChat()
-        val chat2 = ChatService.createChat()
-
+    fun testGetChatByIdNegative() {
+        val user1 = ChatService.createUser()
+        val user2 = ChatService.createUser()
+        val chat1 = ChatService.createMessage(user1, user2)
+        val user3 = ChatService.createUser()
+        val user4 = ChatService.createUser()
+        val chat2 = ChatService.createMessage(user3, user4)
         assertNotEquals(chat1, ChatService.getChatById(chat2.id))
     }
 
     @Test(expected = ChatNotFoundException::class)
-    fun testAddUserToChatByExceptionChat(){
+    fun testAddUserToChatByExceptionChat() {
         val user = ChatService.createUser()
-
         ChatService.addUserToChat(2, user.id)
     }
 
     @Test(expected = UserNotFoundException::class)
-    fun testAddUserToChatByExceptionUser(){
-        val chat = ChatService.createChat()
-
-        ChatService.addUserToChat(chat.id, 2)
+    fun testAddUserToChatByExceptionUser() {
+        val user1 = ChatService.createUser()
+        val user2 = ChatService.createUser()
+        val chat = ChatService.createMessage(user1, user2)
+        ChatService.addUserToChat(chat.id, 3)
     }
 
     @Test
-    fun testAddUserToChat(){
-        val chat = ChatService.createChat()
-        val user = ChatService.createUser()
-
-        assertEquals(true, ChatService.addUserToChat(chat.id, user.id))
+    fun testAddUserToChat() {
+        val user1 = ChatService.createUser()
+        val user2 = ChatService.createUser()
+        val user3 = ChatService.createUser()
+        val chat = ChatService.createMessage(user1, user2)
+        assertEquals(true, ChatService.addUserToChat(chat.id, user3.id))
     }
 
     @Test(expected = ChatNotFoundException::class)
-    fun testDeleteChatByExceptionChat(){
-        val chat = ChatService.createChat()
-
+    fun testDeleteChatByExceptionChat() {
+        val user1 = ChatService.createUser()
+        val user2 = ChatService.createUser()
+        val chat = ChatService.createMessage(user1, user2)
         ChatService.deleteChat(3)
     }
 
     @Test
-    fun testDeleteChat(){
-        val chat = ChatService.createChat()
-
+    fun testDeleteChat() {
+        val user1 = ChatService.createUser()
+        val user2 = ChatService.createUser()
+        val chat = ChatService.createMessage(user1, user2)
         assertEquals(true, ChatService.deleteChat(chat.id))
     }
 
     @Test
-    fun testGetChatsPositive(){
-        ChatService.createChat()
-
-
+    fun testGetChatsPositive() {
+        val user1 = ChatService.createUser()
+        val user2 = ChatService.createUser()
+        val chat = ChatService.createMessage(user1, user2)
         assertEquals(1, ChatService.getChats().size)
     }
 
     @Test
-    fun testGetChatsNegative(){
-        ChatService.createChat()
-
-
+    fun testGetChatsNegative() {
+        val user1 = ChatService.createUser()
+        val user2 = ChatService.createUser()
+        val chat = ChatService.createMessage(user1, user2)
         assertNotEquals(2, ChatService.getChats().size)
     }
 
-    @Test(expected = ChatNotFoundException::class)
-    fun testCreateMessageByExceptionChat(){
-        val user = ChatService.createUser()
-
-        ChatService.createMessage(3, user)
-    }
-
-    @Test(expected = NotEnoughUsersException::class)
-    fun testCreateMessageByExceptionNotEnoughUsers(){
-        val chat = ChatService.createChat()
-        val user = ChatService.createUser()
-
-        ChatService.createMessage(chat.id, user)
-    }
-
     @Test
-    fun testCreateMessagePositive(){
-        val chat = ChatService.createChat()
+    fun testCreateMessagePositive() {
         val user1 = ChatService.createUser()
         val user2 = ChatService.createUser()
-        ChatService.addUserToChat(chat.id, user1.id)
-        ChatService.addUserToChat(chat.id, user2.id)
-        ChatService.createMessage(chat.id, user1)
-        val message = ChatService.createMessage(chat.id, user1)
-
-        assertEquals("test", message.text)
+        val chat = ChatService.createMessage(user1, user2)
+        assertEquals(1, chat.messages.size)
     }
 
     @Test(expected = ChatNotFoundException::class)
-    fun testEditMessageByExceptionChatNotFound(){
-        val chat = ChatService.createChat()
+    fun testEditMessageByExceptionChatNotFound() {
         val user1 = ChatService.createUser()
         val user2 = ChatService.createUser()
-        ChatService.addUserToChat(chat.id, user1.id)
-        ChatService.addUserToChat(chat.id, user2.id)
+        val chat = ChatService.createMessage(user1, user2)
         val editedText = "353"
-        val message = ChatService.createMessage(chat.id, user1)
-
-        ChatService.editMessage(3, message.id, editedText)
+        ChatService.editMessage(3, chat.messages[0].id, editedText)
     }
 
     @Test(expected = MessageNotFoundException::class)
-    fun testEditMessageByExceptionMessageNotFound(){
-        val chat = ChatService.createChat()
+    fun testEditMessageByExceptionMessageNotFound() {
         val user1 = ChatService.createUser()
         val user2 = ChatService.createUser()
-        ChatService.addUserToChat(chat.id, user1.id)
-        ChatService.addUserToChat(chat.id, user2.id)
+        val chat = ChatService.createMessage(user1, user2)
         val editedText = "353"
-        val message = ChatService.createMessage(chat.id, user1)
-
         ChatService.editMessage(chat.id, 3, editedText)
     }
 
     @Test
-    fun testEditMessagePositive(){
-        val chat = ChatService.createChat()
+    fun testEditMessagePositive() {
         val user1 = ChatService.createUser()
         val user2 = ChatService.createUser()
-        ChatService.addUserToChat(chat.id, user1.id)
-        ChatService.addUserToChat(chat.id, user2.id)
-        ChatService.createMessage(chat.id, user1)
-        val message = ChatService.createMessage(chat.id, user1)
+        val chat = ChatService.createMessage(user1, user2)
         val editedText = "353"
-        ChatService.editMessage(chat.id, message.id, editedText)
-
-        assertEquals("353", message.text)
+        ChatService.editMessage(chat.id, chat.messages[0].id, editedText)
+        assertEquals("353", chat.messages[0].text)
     }
 
     @Test(expected = ChatNotFoundException::class)
-    fun testDeleteMessageByExceptionChatNotFound(){
-        val chat = ChatService.createChat()
+    fun testDeleteMessageByExceptionChatNotFound() {
         val user1 = ChatService.createUser()
         val user2 = ChatService.createUser()
-        ChatService.addUserToChat(chat.id, user1.id)
-        ChatService.addUserToChat(chat.id, user2.id)
-        val editedText = "353"
-        val message = ChatService.createMessage(chat.id, user1)
-
-        ChatService.deleteMessage(3, message.id)
+        val chat = ChatService.createMessage(user1, user2)
+        ChatService.deleteMessage(3, chat.messages[0].id)
     }
 
     @Test(expected = MessageNotFoundException::class)
-    fun testDeleteMessageByExceptionMessageNotFound(){
-        val chat = ChatService.createChat()
+    fun testDeleteMessageByExceptionMessageNotFound() {
         val user1 = ChatService.createUser()
         val user2 = ChatService.createUser()
-        ChatService.addUserToChat(chat.id, user1.id)
-        ChatService.addUserToChat(chat.id, user2.id)
-        val editedText = "353"
-        val message = ChatService.createMessage(chat.id, user1)
-
+        val chat = ChatService.createMessage(user1, user2)
         ChatService.deleteMessage(chat.id, 3)
     }
 
     @Test
-    fun testDeleteMessagePositive(){
-        val chat = ChatService.createChat()
+    fun testDeleteMessagePositive() {
         val user1 = ChatService.createUser()
         val user2 = ChatService.createUser()
-        ChatService.addUserToChat(chat.id, user1.id)
-        ChatService.addUserToChat(chat.id, user2.id)
-        ChatService.createMessage(chat.id, user1)
-        val message = ChatService.createMessage(chat.id, user1)
-
-        assertEquals(true, ChatService.deleteMessage(chat.id, message.id))
+        val chat = ChatService.createMessage(user1, user2)
+        assertEquals(true, ChatService.deleteMessage(chat.id, chat.messages[0].id))
     }
 
     @Test(expected = ChatNotFoundException::class)
-    fun testGetMessagesByIdOfUserByExceptionChatNotFound(){
-        val chat = ChatService.createChat()
+    fun testGetMessagesByIdOfUserByExceptionChatNotFound() {
         val user1 = ChatService.createUser()
         val user2 = ChatService.createUser()
-        ChatService.addUserToChat(chat.id, user1.id)
-        ChatService.addUserToChat(chat.id, user2.id)
-        val message = ChatService.createMessage(chat.id, user1)
-
+        val chat = ChatService.createMessage(user1, user2)
         ChatService.getMessagesByIdOfUser(3, 5, user1.id)
     }
 
     @Test
-    fun testGetMessagesByIdOfUserPositive(){
-        val chat = ChatService.createChat()
+    fun testGetMessagesByIdOfUserPositive() {
         val user1 = ChatService.createUser()
         val user2 = ChatService.createUser()
-        ChatService.addUserToChat(chat.id, user1.id)
-        ChatService.addUserToChat(chat.id, user2.id)
-        val message = ChatService.createMessage(chat.id, user1)
-        ChatService.createMessage(chat.id, user1)
-        ChatService.createMessage(chat.id, user2)
-        ChatService.createMessage(chat.id, user1)
+        val chat = ChatService.createMessage(user1, user2)
+        ChatService.createMessage(user1, user2)
+        ChatService.createMessage(user1, user2)
         val messages = ChatService.getMessagesByIdOfUser(chat.id, 3, user1.id)
-
-        assertEquals(3, messages.size)
+        assertEquals(1, messages.size)
     }
 }

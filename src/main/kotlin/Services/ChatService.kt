@@ -2,7 +2,6 @@ package Services
 
 import Exceptions.ChatNotFoundException
 import Exceptions.MessageNotFoundException
-import Exceptions.NotEnoughUsersException
 import Exceptions.UserNotFoundException
 
 data class User(
@@ -45,7 +44,7 @@ object ChatService {
 
     /*-------------------------------------------------------------*/
 
-    fun createChat(): Chat {
+    private fun createChat(): Chat {
         val chat = Chat(nextIdChat++)
         chats.add(chat)
         //chat.users.add(createUser(user1))
@@ -78,14 +77,18 @@ object ChatService {
     /*-------------------------------------------------------------*/
 
 
-    fun createMessage(chatId: Int, user: User): Message {
-        val chat = getChatById(chatId) ?: throw ChatNotFoundException("Чат небыл найден!")
-        if (chat.users.size < 2) {
-            throw NotEnoughUsersException("В чате недостаточно юзеров")
-        }
-        val message = Message(nextIdMessage++, ownerOfMessage = user)
+    fun createMessage(/*chatId: Int,*/ user1: User, user2: User): Chat {
+
+//        val chat = getChatById(chatId) ?: throw ChatNotFoundException("Чат небыл найден!")
+//        if (chat.users.size < 2) {
+//            throw NotEnoughUsersException("В чате недостаточно юзеров")
+//        }
+        val chat = createChat()
+        chat.users.add(user1)
+        chat.users.add(user2)
+        val message = Message(nextIdMessage++, ownerOfMessage = user1)
         chat.messages.add(message)
-        return message
+        return chat
     }
 
     fun editMessage(chatId: Int, messageId: Int, editedText: String): Message {
