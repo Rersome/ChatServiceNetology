@@ -44,14 +44,14 @@ object ChatService {
 
     /*-------------------------------------------------------------*/
 
-    private fun createChat(): Chat {
-        val chat = Chat(nextIdChat++)
-        chats.add(chat)
-        //chat.users.add(createUser(user1))
-        //chat.users.add(createUser(user2))
-        //chat.messages.add(message)
-        return chat
-    }
+//    private fun createChat(): Chat {
+//        val chat = Chat(nextIdChat++)
+//        chats.add(chat)
+//        //chat.users.add(createUser(user1))
+//        //chat.users.add(createUser(user2))
+//        //chat.messages.add(message)
+//        return chat
+//    }
 
     fun getChatById(id: Int): Chat? {
         return chats.find { it.id == id }
@@ -77,18 +77,33 @@ object ChatService {
     /*-------------------------------------------------------------*/
 
 
-    fun createMessage(/*chatId: Int,*/ user1: User, user2: User): Chat {
+    fun createMessage(/*chatId: Int,*/ user1: User, user2: User, messageText: String): Chat {
 
 //        val chat = getChatById(chatId) ?: throw ChatNotFoundException("Чат небыл найден!")
 //        if (chat.users.size < 2) {
 //            throw NotEnoughUsersException("В чате недостаточно юзеров")
 //        }
-        val chat = createChat()
-        chat.users.add(user1)
-        chat.users.add(user2)
-        val message = Message(nextIdMessage++, ownerOfMessage = user1)
-        chat.messages.add(message)
-        return chat
+//        val chat = createChat()
+//        chat.users.add(user1)
+//        chat.users.add(user2)
+//        val message = Message(nextIdMessage++, ownerOfMessage = user1)
+//        chat.messages.add(message)
+//        return chat
+        val existingChat = chats.find { chat -> chat.users.contains(user1)
+                && chat.users.contains(user2) }
+        return if (existingChat != null) {
+            val message = Message(nextIdMessage++, messageText, ownerOfMessage = user1)
+            existingChat.messages.add(message)
+            existingChat
+        } else {
+            val chat = Chat(nextIdChat++)
+            chat.users.add(user1)
+            chat.users.add(user2)
+            val message = Message(nextIdMessage++, messageText, ownerOfMessage = user1)
+            chat.messages.add(message)
+            chats.add(chat)
+            chat
+        }
     }
 
     fun editMessage(chatId: Int, messageId: Int, editedText: String): Message {
