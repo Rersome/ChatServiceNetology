@@ -91,7 +91,7 @@ object ChatService {
 //        return chat
         val existingChat = chats.find { chat -> chat.users.contains(user1)
                 && chat.users.contains(user2) }
-        return if (existingChat != null) {
+        /*return if (existingChat != null) {
             val message = Message(nextIdMessage++, messageText, ownerOfMessage = user1)
             existingChat.messages.add(message)
             existingChat
@@ -103,7 +103,15 @@ object ChatService {
             chat.messages.add(message)
             chats.add(chat)
             chat
+        }*/
+        val chat = existingChat ?: Chat(nextIdChat++).apply {
+            users.add(user1)
+            users.add(user2)
+            chats.add(this)
         }
+        val message = Message(nextIdChat++, messageText, ownerOfMessage = user1)
+        chat.messages.add(message)
+        return chat
     }
 
     fun editMessage(chatId: Int, messageId: Int, editedText: String): Message {
@@ -123,7 +131,10 @@ object ChatService {
     fun getMessagesByIdOfUser(chatId: Int, numberOfMessages: Int, idOfUser: Int): List<Message> {
         val chat = getChatById(chatId) ?: throw ChatNotFoundException("Чат небыл найден!")
         chat.messages.forEach { it.isMessageRead = true }
-        return chat.messages.filter { it.ownerOfMessage.id == idOfUser } .take(numberOfMessages)
+        return chat.messages.asSequence()
+            .filter { it.ownerOfMessage.id == idOfUser }
+            .take(numberOfMessages)
+            .toList()
     }
 
     fun clear() {
